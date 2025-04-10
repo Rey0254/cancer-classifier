@@ -1,0 +1,37 @@
+name: Train and Build
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  train-and-build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.10
+
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+
+    - name: Train model
+      run: |
+        python app/model.py
+
+    - name: Build Docker image
+      run: |
+        docker build -t cancer-model .
+
+    # - name: Push to DockerHub (opcional)
+    #   run: |
+    #     echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+    #     docker tag cancer-model docker.io/${{ secrets.DOCKER_USERNAME }}/cancer-model
+    #     docker push docker.io/${{ secrets.DOCKER_USERNAME }}/cancer-model
