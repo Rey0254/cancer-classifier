@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  train-and-build:
+  train-and-push:
     runs-on: ubuntu-latest
 
     steps:
@@ -26,12 +26,17 @@ jobs:
       run: |
         python app/model.py
 
+    - name: Log in to Docker Hub
+      run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
     - name: Build Docker image
       run: |
         docker build -t cancer-model .
 
-    # - name: Push to DockerHub (opcional)
-    #   run: |
-    #     echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-    #     docker tag cancer-model docker.io/${{ secrets.DOCKER_USERNAME }}/cancer-model
-    #     docker push docker.io/${{ secrets.DOCKER_USERNAME }}/cancer-model
+    - name: Tag Docker image
+      run: |
+        docker tag cancer-model ${{ secrets.DOCKER_USERNAME }}/cancer-model:latest
+
+    - name: Push Docker image
+      run: |
+        docker push ${{ secrets.DOCKER_USERNAME }}/cancer-model:latest
